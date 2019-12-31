@@ -1616,11 +1616,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\DeskJIMILI\\DeskTop\\ConsoleApp1\\ConsoleApp1\\ConsoleApp1.csproj",
+      "projectUniqueName": "F:\\SoftOfJIMILI\\Github\\workspaceJM\\SeatTestSQLOfJM\\ConsoleApp1\\ConsoleApp1\\ConsoleApp1.csproj",
       "projectName": "ConsoleApp1",
-      "projectPath": "D:\\DeskJIMILI\\DeskTop\\ConsoleApp1\\ConsoleApp1\\ConsoleApp1.csproj",
+      "projectPath": "F:\\SoftOfJIMILI\\Github\\workspaceJM\\SeatTestSQLOfJM\\ConsoleApp1\\ConsoleApp1\\ConsoleApp1.csproj",
       "packagesPath": "C:\\Users\\JIMILI\\.nuget\\packages\\",
-      "outputPath": "D:\\DeskJIMILI\\DeskTop\\ConsoleApp1\\ConsoleApp1\\obj\\",
+      "outputPath": "F:\\SoftOfJIMILI\\Github\\workspaceJM\\SeatTestSQLOfJM\\ConsoleApp1\\ConsoleApp1\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackagesFallback\\",

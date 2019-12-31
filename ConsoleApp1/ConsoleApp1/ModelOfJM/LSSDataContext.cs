@@ -114,7 +114,9 @@ namespace ConsoleApp1.ModelOfJM
 
                 entity.Property(e => e.Oetime).HasColumnType("datetime");
 
-                entity.Property(e => e.Ostate).HasMaxLength(2);
+                entity.Property(e => e.Ostate)
+                    .HasMaxLength(2)
+                    .HasDefaultValueSql("''");
 
                 entity.Property(e => e.Ostime).HasColumnType("datetime");
 
@@ -194,8 +196,7 @@ namespace ConsoleApp1.ModelOfJM
                     .HasCollation("utf8_general_ci");
 
                 entity.Property(e => e.Slock)
-                    .IsRequired()
-                    .HasMaxLength(2)
+                    .HasColumnType("int(11)")
                     .HasDefaultValueSql("'0'");
 
                 entity.Property(e => e.Sname)
@@ -209,8 +210,7 @@ namespace ConsoleApp1.ModelOfJM
                     .HasCollation("utf8_general_ci");
 
                 entity.Property(e => e.Ssex)
-                    .IsRequired()
-                    .HasMaxLength(1)
+                    .HasColumnType("int(11)")
                     .HasDefaultValueSql("'0'")
                     .HasComment("0代表男，1代表女");
 

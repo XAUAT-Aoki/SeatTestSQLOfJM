@@ -14,9 +14,9 @@ namespace ConsoleApp1.ModelOfJM
         public string Sname { get; set; }
         public string Spassword { get; set; }
         public string Semail { get; set; }
-        public byte[] Ssex { get; set; }
+        public int? Ssex { get; set; }
         public int? Svalue { get; set; }
-        public byte[] Slock { get; set; }
+        public int? Slock { get; set; }
 
         public virtual ICollection<Order> Order { get; set; }
     }
