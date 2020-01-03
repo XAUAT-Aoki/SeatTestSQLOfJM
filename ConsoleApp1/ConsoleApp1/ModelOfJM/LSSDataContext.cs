@@ -50,7 +50,7 @@ namespace ConsoleApp1.ModelOfJM
                     .HasCollation("utf8_general_ci");
 
                 entity.Property(e => e.Apassword)
-                    .HasColumnType("varchar(16)")
+                    .HasColumnType("varchar(96)")
                     .HasCharSet("utf8")
                     .HasCollation("utf8_general_ci");
             });
@@ -62,10 +62,7 @@ namespace ConsoleApp1.ModelOfJM
 
                 entity.ToTable("library");
 
-                entity.Property(e => e.Lid)
-                    .HasColumnType("varchar(2)")
-                    .HasCharSet("utf8")
-                    .HasCollation("utf8_general_ci");
+                entity.Property(e => e.Lid).HasColumnType("int(10)");
 
                 entity.Property(e => e.Lefloor).HasColumnType("int(11)");
 
@@ -115,8 +112,10 @@ namespace ConsoleApp1.ModelOfJM
                 entity.Property(e => e.Oetime).HasColumnType("datetime");
 
                 entity.Property(e => e.Ostate)
-                    .HasMaxLength(2)
-                    .HasDefaultValueSql("''");
+                    .HasColumnType("varchar(2)")
+                    .HasDefaultValueSql("''")
+                    .HasCharSet("utf8")
+                    .HasCollation("utf8_general_ci");
 
                 entity.Property(e => e.Ostime).HasColumnType("datetime");
 
@@ -158,9 +157,8 @@ namespace ConsoleApp1.ModelOfJM
                     .HasCollation("utf8_general_ci");
 
                 entity.Property(e => e.Lid)
-                    .HasColumnType("varchar(2)")
-                    .HasCharSet("utf8")
-                    .HasCollation("utf8_general_ci");
+                    .HasColumnType("int(10)")
+                    .ValueGeneratedOnAdd();
 
                 entity.Property(e => e.Tfloor)
                     .HasColumnType("int(11)")
@@ -175,6 +173,7 @@ namespace ConsoleApp1.ModelOfJM
                 entity.HasOne(d => d.L)
                     .WithMany(p => p.Seat)
                     .HasForeignKey(d => d.Lid)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("Lid");
             });
 
@@ -196,8 +195,10 @@ namespace ConsoleApp1.ModelOfJM
                     .HasCollation("utf8_general_ci");
 
                 entity.Property(e => e.Slock)
-                    .HasColumnType("int(11)")
-                    .HasDefaultValueSql("'0'");
+                    .HasColumnType("varchar(11)")
+                    .HasDefaultValueSql("'0'")
+                    .HasCharSet("utf8")
+                    .HasCollation("utf8_general_ci");
 
                 entity.Property(e => e.Sname)
                     .HasColumnType("varchar(30)")
@@ -205,14 +206,16 @@ namespace ConsoleApp1.ModelOfJM
                     .HasCollation("utf8_general_ci");
 
                 entity.Property(e => e.Spassword)
-                    .HasColumnType("varchar(16)")
+                    .HasColumnType("varchar(96)")
                     .HasCharSet("utf8")
                     .HasCollation("utf8_general_ci");
 
                 entity.Property(e => e.Ssex)
-                    .HasColumnType("int(11)")
+                    .HasColumnType("varchar(11)")
                     .HasDefaultValueSql("'0'")
-                    .HasComment("0代表男，1代表女");
+                    .HasComment("0代表男，1代表女")
+                    .HasCharSet("utf8")
+                    .HasCollation("utf8_general_ci");
 
                 entity.Property(e => e.Svalue).HasColumnType("int(11)");
             });

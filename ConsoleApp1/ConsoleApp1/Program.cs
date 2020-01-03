@@ -58,10 +58,6 @@ namespace ConsoleApp1
             {
                 var students = await context.Student.ToListAsync();
             }
-            //foreach (var item in students)
-            {
-                //student.Add(item);
-            }
             return student;
         }
         #endregion
@@ -76,11 +72,11 @@ namespace ConsoleApp1
                            select st).GetEnumerator();
                 while (stu.MoveNext()) students.Add(stu.Current);
                 return students;
-                /*           var stu = (from st in context.Set<Student>()
-                                      orderby st.Sid ascending
-                                      select st).Cast<object>().ToList();//装箱
-                           students = stu.Cast<Student>.ToList();//拆箱
-                            return stu;*/
+                /*        var stu = (from st in context.Set<Student>()
+                                   orderby st.Sid ascending
+                                   select st).Cast<object>().ToList();//装箱
+                        students = stu.Cast<Student>.ToList();//拆箱
+                        return stu;*/
 
             }
         }
@@ -144,7 +140,7 @@ namespace ConsoleApp1
         }
         #endregion
         #region 6.更新某字段
-        public bool updateLibrary(string lid, string name)
+        public bool updateLibrary(int lid, string name)
         {
             bool flag = false;
             using (var dbContext = new LSSDataContext())
@@ -171,8 +167,6 @@ namespace ConsoleApp1
             }
         }
         #endregion
-
-
 
         #region 正式测试
         #region 1.查询密码  已完成
@@ -226,8 +220,8 @@ namespace ConsoleApp1
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine(e.Message);
                         transaction.Rollback();
+                        return false;
                     }
                     return flag;
                 }
@@ -249,94 +243,68 @@ namespace ConsoleApp1
             return student;
         }
         #endregion
+
         #region 4.空闲座位查询 未完成
-        /*         /// <summary>
-                 /// 空闲座位查询
-                 /// </summary>
-                 /// <param name="condition"></param>
-                 /// <returns></returns>
-                 public List<Seat> Leisure(Condition condition)
-                 {
-                     Condition StartCondition = LeisureDeal(condition);
-
-                     //判断是否是当天的日期
-                     //如果开始时间和结束时间为null，则查询开始时间不小于6点，结束时间不大于23点
-                     //如果输入condition.TimeBulk是0，则使用“111111111111111”
-                     //对condition.data进行日期判断
-
-                     return new List<Seat>();
-                 }*/
+        /// <summary>
+        /// 空闲座位查询
+        /// </summary>
+        /// <param name="condition"></param>
+        /// <returns></returns>
+        /* public List<Seat> Leisure(Condition condition)
+         {
+             Condition StartCondition = LeisureDeal(condition);
+             //判断是否是当天的日期
+             //如果开始时间和结束时间为null，则查询开始时间不小于6点，结束时间不大于23点
+             //如果输入condition.TimeBulk是0，则使用“111111111111111”
+             //对condition.data进行日期判断
+             return new List<Seat>();
+         }*/
         #endregion
         #region 5.不懂  未完成
-        /*            /// <summary>
-                    /// 处理含有空字符的数据
-                    /// </summary>
-                    /// <param name="condition">返回处理结果用于可直接拼装sql的对象</param>
-                    /// <returns>返回处理过的对象</returns>
-                    public Condition LeisureDeal(Condition condition)
-                    {
-                        //使用try{]catch(){}语句处理转换异常
-                        return new Condition();
-                    }*/
+        /*  /// <summary>
+          /// 处理含有空字符的数据
+          /// </summary>
+          /// <param name="condition">返回处理结果用于可直接拼装sql的对象</param>
+          /// <returns>返回处理过的对象</returns>
+          public Condition LeisureDeal(Condition condition)
+          {
+              //使用try{]catch(){}语句处理转换异常
+              return new Condition();
+          }*/
         #endregion
-        #region 6.查询座位状态 有问题
-        //public string SeatState(int date, string seatid)
-        //{
 
-        //    //查询状态字段，
-
-
-
-        //    //判断是否是当天的状态
-
-        //    //截取所需当天的24位字符并返回
-
-        //    return "";
-        //}
+        #region 6.查询座位状态 已完成
+        public string SeatState(int date, string seatid)
+        {
+            using (var context = new LSSDataContext())
+            {
+                //查询状态字段，
+                string str = context.Seat.FirstOrDefault(x => x.Tid == seatid).Tstate;
+                char[] str2 = new char[24];
+                //判断是否是当天的状态
+                if (date == 0)
+                {
+                    str2 = str.Substring(0, 24).ToCharArray();
+                }
+                else
+                {
+                    str2 = str.Substring(24, 24).ToCharArray();
+                }
+                string str3 = new string(str2);
+                return str3;
+            }
+        }
         #endregion
-        #region 7.修改个人的lock锁 有问题
+        #region 7.修改个人的lock锁 已完成 修改了传入参数operation为char类型，去掉ad(原来获取的锁的状态）
         /// <summary>
         /// 修改个人的lock锁
         /// </summary>
-        /// <param name="operation">状态修改的目标值</param>
+        /// <param name="operation">状态修改的目标值这里为char类型，只传一个字符就可以例如‘1’</param>
         /// <param name="date">日期</param>
-        /// <param name="username">座位ID</param>
-        /// <param name="">lock字段</param>
-        public void ModifyInfor(int operation, int date, string username, byte ad)
+        /// <param name="username">个人id</param>
+        public bool ModifyInfor(char operation, int date, string username)
         {
-
-        }
-        #endregion
-        #region 8.查询lock锁状态 返回类型为byte[]类型 已修改    已完成
-        /// <summary>
-        /// 查询lock字段，返回byte[0]
-        /// </summary>
-        /// <param name="username"></param>
-        /// <returns></returns>
-        public int? getLock(string username)
-        {
-            using (var dbContext = new LSSDataContext())
-            {
-                var state = dbContext.Student.Where(x => x.Sid == username).FirstOrDefault();
-                return state.Slock;
-            }
-            //调用正则匹配，进行查询lock字段
-        }
-        #endregion
-        #region 9.修改座位状态【函数 返回值 有差异】 返回类型给为bool 已完成
-        /// <summary>
-        /// 修改座位状态
-        /// </summary>
-        /// <param name="date">日期</param>
-        /// <param name="str">座位状态信息</param>
-        /// <param name="seatid">座位id</param>
-        /// <param name="num">处理后需要修改的状态的开始坐标</param>
-        /// <param name="duration">时长</param>
-        /// <param name="operation">目标值</param>
-        public bool SeatInfor(int date, string str, string seatid, int num, int duration, int operation)
-        {
-            string temp = date + str + seatid + num + duration + operation;
-            Seat seat = new Seat();
+            Student student = new Student();
             bool flag = false;
             using (var context = new LSSDataContext())
             {
@@ -344,33 +312,102 @@ namespace ConsoleApp1
                 {
                     try
                     {
-                        seat = context.Seat.Where(x => x.Tid == seatid).ToList().First();
-                        seat.Tstate = temp;
-                        context.Seat.Update(seat);
+                        student = context.Student.FirstOrDefault(x => x.Sid == username);
+                        char[] old = { student.Slock.ElementAt(0), student.Slock.ElementAt(1) };
+                        if (date == 0) old[0] = operation;//修改第一天的状态
+                        else old[1] = operation;//修改第二天的状态
+                        string str = new string(old);
+                        student.Slock = str;
+                        context.Update(student);
                         context.SaveChanges();
                         transaction.Commit();
                         flag = true;
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
-                        Console.WriteLine(e.Message);
                         transaction.Rollback();
+                        return false;
                     }
                     return flag;
                 }
             }
+        }
+        #endregion
+        #region 8.查询lock锁状态     已完成
+        /// <summary>
+        /// 查询lock字段，返回byte[0]
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns></returns>
+        public string getLock(string username)
+        {
+            using (var dbContext = new LSSDataContext())
+            {
+                Student state = new Student();
+                Help h = new Help();
+                if (h.IsStudentId(username))
+                    state = dbContext.Student.Where(x => x.Sid == username).FirstOrDefault();
+                else
+                    state = dbContext.Student.Where(x => x.Semail == username).FirstOrDefault();
+                return state.Slock;
+            }
+            //调用正则匹配，进行查询lock字段
+        }
+        #endregion
+        #region 9.修改座位状态【函数 返回值 有差异】 返回类型给为bool  已完成
+        /// <summary>
+        /// 修改座位状态
+        /// </summary>
+        /// <param name="date">第几天</param>
+        /// <param name="str">座位状态信息</param>
+        /// <param name="seatid">座位id</param>
+        /// <param name="num">处理后需要修改的状态的开始坐标</param>
+        /// <param name="duration">时长</param>
+        /// <param name="operation">目标值</param>
+        public bool SeatInfor(int date, string seatid, int num, int duration, char operation)
+        {
+            Seat seat = new Seat();
+            using (var context = new LSSDataContext())
+            {
+                seat = context.Seat.FirstOrDefault(x => x.Tid == seatid);
+                char[] c = new char[48];
+                c = seat.Tstate.ToCharArray();
+                if (date == 1)
+                {
+                    for (int i = 23 + num; i < 23 + num + duration; i++)
+                        c[i] = operation;
+                }
+                else
+                {
+                    for (int i = num; i < num + duration; i++)
+                        c[i] = operation;
+                }
+                string s = new string(c);
+                seat.Tstate = s;
+                context.Seat.Update(seat);
+                context.SaveChanges();
+            }
+            return true;
             //将字符串修改之后直接插入座位表
         }
         #endregion
-        #region 10.订单增加一条数据【未完成】
+        #region 10.订单增加一条数据【已完成】
         /// <summary>
         /// 在订单表中插入一条记录
         /// </summary>
         /// <param name="order"></param>
-        public void SetOrder(Order order)
+        public bool SetOrder(Order order)
         {
             //插入一条订单记录到订单表（id,学号,座位号，订单开始时间，结束时间，打卡时间，订单状态）
             //订单id（图书馆号+层号+座位号+系统时间）
+            bool flag = false;
+            using (var context = new LSSDataContext())
+            {
+                context.Order.Add(order);
+                context.SaveChanges();
+                flag = true;
+            }
+            return flag;
         }
         #endregion
         #region 11.根据Seat的ID获取Seat对象 已完成
@@ -391,44 +428,51 @@ namespace ConsoleApp1
             return seat;
         }
         #endregion
-        /* #region 12.获取所有正在使用的订单
-         //获取所有正在使用的订单
-         public List<Order> GetUsingOrder()
-         {
-             using (var dbContext = new LSSDataContext())
-             {
-                 List<Order> Olist = new List<Order>();
-                 DateTime dtToday = Convert.ToDateTime(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-                 var queryable = (from list in dbContext.Order
-                                  where dtToday >= list.Ostime && dtToday <= list.Oetime
-                                  select list).GetEnumerator();
-                 while (queryable.MoveNext()) Olist.Add(queryable.Current);
-                 return Olist;
-             }
-         }
-         #endregion*/
-        #region 13.根据订单改变订单状态【未完成】
+        #region 12.获取所有正在使用的订单 已完成
+        //获取所有正在使用的订单
+        public List<Order> GetUsingOrder()
+        {
+            using (var dbContext = new LSSDataContext())
+            {
+                List<Order> Olist = new List<Order>();
+                DateTime dtToday = Convert.ToDateTime(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                var queryable = (from list in dbContext.Order
+                                 where dtToday >= list.Ostime && dtToday <= list.Oetime
+                                 select list).GetEnumerator();
+                while (queryable.MoveNext()) Olist.Add(queryable.Current);
+                return Olist;
+            }
+        }
+        #endregion
+        #region 13.根据订单改变订单状态【已完成】，修改传入参数传入状态为string,修改传入id为string，原来为object。修改返回类型为bool
         /// <summary>
         /// 根据ID直接改变订单状态
         /// </summary>
         /// <param name="oid">订单ID</param>
-        public void ChangeOrderState(object oid)
+        public bool ChangeOrderState(string oid, string operation)
         {
             //根据ID直接改变订单状态
-        }
-        #endregion
-        #region 14. 返回打卡时间是否在指定时间范围内【未完成】
-        /// <summary>
-        /// 返回打卡时间是否在指定时间范围内
-        /// </summary>
-        /// <param name="now">实际打卡时间</param>
-        /// <param name="predict">预计打卡时间</param>
-        /// <returns></returns>
-        /// 
-        public bool IsTrueTime(DateTime now, DateTime predict)
-        {
-            //实际打卡时间必须在预定打卡时间开始后半小时之内
-            return true;
+            bool flag = false;
+            using (var context = new LSSDataContext())
+            {
+                using (var transaction = context.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        var order = context.Order.Where(x => x.Oid == oid).FirstOrDefault();
+                        order.Ostate = operation;
+                        context.Order.Update(order);
+                        context.SaveChanges();
+                        transaction.Commit();
+                        flag = true;
+                    }
+                    catch (Exception)
+                    {
+                        return false;
+                    }
+                }
+            }
+            return flag;
         }
         #endregion
         #region 15.根据座位 ID 在座位表内查询对应的图书馆号 已完成
@@ -437,7 +481,7 @@ namespace ConsoleApp1
         /// </summary>
         /// <param name="seatId">座位 ID</param>
         /// <returns>返回图书馆 ID</returns>
-        public string GetLIdBySId(string seatId)
+        public int GetLIdBySId(string seatId)
         {
             Seat seat = new Seat();
             using (var context = new LSSDataContext())
@@ -449,13 +493,13 @@ namespace ConsoleApp1
             return seat.Lid;
         }
         #endregion
-        #region 16.根据图书馆 ID 返回一个图书馆对象 已完成
+        #region 16.根据图书馆 ID 返回一个图书馆对象   已完成
         /// <summary>
         /// 根据图书馆 ID 返回一个图书馆对象
         /// </summary>
         /// <param name="libraryId">图书馆 ID</param>
         /// <returns>图书馆对象</returns>
-        public Library GetLibraryById(string libraryId)
+        public Library GetLibraryById(int libraryId)
         {
             Library library = new Library();
             using (var context = new LSSDataContext())
@@ -467,40 +511,187 @@ namespace ConsoleApp1
             return library;
         }
         #endregion
+        #region 17.根据id查询订单 已完成
+        /// <summary>
+        /// 根据id查询订单
+        /// </summary>
+        /// <param name="orderid">订单id</param>
+        /// <returns>返回订单对象</returns>
+        public Order GetOrder(string orderid)
+        {
+            //根据id查询一个订单记录，并返回Order对象
+            using (var context = new LSSDataContext())
+            {
+                return context.Order.FirstOrDefault(x => x.Oid == orderid);
+            }
+        }
         #endregion
+        #region 18.修改学生邮箱 已完成 
+        /// <summary>
+        /// 修改学生邮箱
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="newemail"></param>
+        /// <returns></returns>
+        public bool ChangeEmail(string username, string newemail)
+        {
+            Help h = new Help();
+            bool flags = false;
+            //正则表达匹配用户名，学号true
+            bool flag = h.IsStudentId(username);
+            Student s = new Student();
+            using (var context = new LSSDataContext())
+            {
+                using (var transaction = context.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        if (!flag)
+                        {
+                            s = context.Student.FirstOrDefault(x => x.Sid == username);
+                            s.Semail = newemail;
+                            context.Student.Update(s);
+                            context.SaveChanges();
+                            transaction.Commit();
+                            flags = true;
+                            //修改对应邮箱，返回true
+                        }
+                        else
+                        {
+                            s = context.Student.FirstOrDefault(x => x.Semail == username);
+                            s.Semail = newemail;
+                            context.Student.Update(s);
+                            context.SaveChanges();
+                            transaction.Commit();
+                            flags = true;
+                            //修改邮箱，返回false
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        transaction.Rollback();
+                        return false;
+                    }
+                    return flags;
+                }
+            }
+
+        }
+        #endregion
+        #region 18.5修改学生的积分
+        /// <summary>
+        /// 修改学生的积分
+        /// </summary>
+        /// <param name="a">目标值</param>
+        public bool ResetGlory(int a)
+        {
+            //将所有学生的积分值都修改为a
+            List<Student> student = new List<Student>();
+            using (var context = new LSSDataContext())
+            {
+                student = (from s in context.Student
+                           select s
+                         ).ToList();
+                for (int i = 0; i < student.LongCount(); i++)
+                {
+                    student[i].Svalue = a;
+                    context.Student.Update(student[i]);
+                }
+                context.SaveChanges();
+            }
+            return true;
+        }
+        #endregion
+        #region 19.根据学号获取学生的信誉积分 已完成
+        /// <summary>
+        /// 根据学号获取学生的信誉积分
+        /// </summary>
+        /// <param name="stuId">学号</param>
+        /// <returns>信誉积分</returns>
+        public int GetGlory(string stuId)
+        {
+            using (var context = new LSSDataContext())
+            {
+                int level = (int)context.Student.FirstOrDefault(x => x.Sid == stuId).Svalue;
+                return level;
+            }
+        }
+        #endregion
+        #region 20.根据学生学号以及传入的代表第二天的参数 data（1），获取第二天的订单 已完成
+        /// <summary>
+        /// 根据学生学号以及传入的代表第二天的参数 data（1），获取第二天的订单
+        /// </summary>
+        /// <param name="stuId">学号</param>
+        /// <param name="data">代表第二天的参数</param>
+        /// <returns>第二天的订单（如果不存在，返回 null）</returns>
+        public Order GetSecondOrder(string stuId, int data = 1)
+        {
+            //查询并封装为order对象
+            string s2 = DateTime.Now.AddDays(1).Date.ToString("yyyy-MM-dd") + " 00:00:00";
+            DateTime day2 = Convert.ToDateTime(s2);
+            string s1 = DateTime.Now.Date.ToString("yyyy-MM-dd") + " 00:00:00";
+            DateTime day1 = Convert.ToDateTime(s1);
+            List<Order> orders = new List<Order>();
+            using (var dbContext = new LSSDataContext())
+            {
+                if (data==0)
+                {
+                    var order = (from o in dbContext.Order
+                                 where o.Sid == stuId && day1 <= o.Ostime && o.Oetime <= day2
+                                 select o).GetEnumerator();
+                    while (order.MoveNext()) orders.Add(order.Current);
+                }
+                else
+                {
+                    var order = (from o in dbContext.Order
+                                 where o.Sid == stuId && day2 <= o.Ostime
+                                 select o).GetEnumerator();
+                    while (order.MoveNext()) orders.Add(order.Current);
+                }
+                return orders.Last();
+            }
+        }
+        #endregion
+        #endregion
+
         static void Main(string[] args)
         {
             Student student = new Student();
             List<Student> students = new List<Student>();
             Program program = new Program();
+            Admin admin = new Admin();
             #region 初始测试
-            //0.
-            /*      program.QueryStudentSql("1606020002", "1606020002");
-                  Console.WriteLine(student.Sname);*/
-            //1.
-            /* student= program.QueryStudentByPassword("1606020002", "1606020002");
-              Console.WriteLine(student.Sname);*/
-            //3.
+            //          //0.
+            ///*          program.QueryStudentSql("1606020002", "1606020002");
+            //          Console.WriteLine(student.Sname);*/
+            //          //1.
+            //     /*     student = program.QueryStudentByPassword("1606020002", "1606020002");
+            //          Console.WriteLine(student.Sname);*/
+            //          //3.
 
-            //2.
-            /* program.QueryStudentsByPassword("16");*/
-            /*  students = program.AllStudent();*/
-            //4.
-            /*         students = program.QueryStudents();
-                     foreach (var item in students)
-                     {
-                         Console.WriteLine(item.Sid);
-                     }*/
+            //          //2.
+            //          program.QueryStudentsByPassword("16");
+            //          //students = program.AllStudent();
+            //          //4.
+            //     /*     students = program.QueryStudents();
+            //          foreach (var item in students)
+            //          {
+            //              Console.WriteLine(item.Sid);
+            //          }*/
 
-            //5.
-            /*  program.UpdataStudentFen("1606020002");*/
-            /*6.*/
-            /*program.deleteSb("1606020097");
-            program.updateLibrary("L3", "厕所图书馆");*/
+            //          //5.
+            //          //program.UpdataStudentFen("1606020002");
+            //          6.
+            //          /* program.deleteSb("1606020097");
+            //           program.updateLibrary(3, "厕所图书馆");*/
             #endregion
-            #region 正式测试
+
+
+
+
+            #region 1.学生正式测试
             #region 1.查询密码 已完成
-            /* program.GetPassword("1606020002");*/
+            //program.GetPassword("1606020002");
             #endregion
             #region 2.修改密码 已完成
             //program.ChangePassword("1606020002", "1606020002");
@@ -513,33 +704,35 @@ namespace ConsoleApp1
             #region 5.不懂
             #endregion
             #region 6.查询座位状态
-
+            /*   program.SeatState(1, "T003");*/
             #endregion
             #region 7.修改个人的lock锁
 
+            /*    program.ModifyInfor('1', 0, "1606020002");*/
             #endregion
             #region 8.查询lock锁状态
             //program.getLock("1606020002");
             #endregion
 
-
-
-
-
             #region 9.修改座位状态
-
+            /*program.SeatInfor(1, "T003", 8, 4, '0');*/
             #endregion
             #region 10.订单增加一条数据
-
+            /*       Order order = new Order();
+                   order.Oid ="O10011";
+                   order.Ostate = "使用";
+                   order.Sid = "1606020002";
+                   order.Tid = "T003";
+                   program.SetOrder(order);*/
             #endregion
             #region 11.根据Seat的ID获取Seat对象
 
             #endregion
             #region 12.获取所有正在使用的订单 已完成
-            program.GetUsingOrder();
+            /*program.GetUsingOrder();*/
             #endregion
             #region 13.根据订单改变订单状态
-
+            /*  program.ChangeOrderState("O10008","已用");*/
             #endregion
             #region 14. 返回打卡时间是否在指定时间范围内
 
@@ -550,7 +743,50 @@ namespace ConsoleApp1
             #region 16.根据图书馆 ID 返回一个图书馆对象
 
             #endregion
+            #region 18.
+            //program.ChangeEmail("168935.@qq.com", "923749851@qq.com");
             #endregion
+            #region 17.根据id查询订单
+            /*program.GetOrder("O10004");*/
+            #endregion
+            #region 19.根据学号获取学生的信誉积分
+            /*  program.GetGlory("1606020002");*/
+            #endregion
+            #region 20. 根据学生学号以及传入的代表第二天的参数 data（1），获取第二天的订单
+            program.GetSecondOrder("1606020003");
+            program.GetSecondOrder("1606020003",0);
+            #endregion
+            #endregion
+
+            #region 2.管理员正式测试
+            #region 1.获取管理员密码
+            /*  admin.GetPassword("16001");*/
+
+            #endregion
+            #region 2.向管理员表中写入该管理员的新密码 已完成 修改返回类型为bool，传入参数为管理员ID
+
+            //admin.ChangePassword("16001", "16001");
+            #endregion
+            #region 3.按座位号查询座位封装为对象 已完成
+            //admin.ReferSeatById("T001");
+            #endregion
+            #region 4.查询所有的符合条件的座位 已完成 输入的两个参数这里处理的是且的关系
+            /*   admin.ReferSeatViewModel("学府城", 2);*/
+            #endregion
+            #region 5.设置座位状态  已完成 修改返回类型为bool，传入的seat状态应为string类型
+            /*admin.SetSeatState("T001", "1");*/
+            #endregion
+            #region 6.根据座位号查询目前未使用的订单对应的学号 已完成
+            //admin.GetSIdByOrder("T004");
+            #endregion
+            #region 7.与5函数一样
+            /* admin.SeatInfor("T003", "100001100101100101000101000010101000101010101000");*/
+            //admin.GetAllLibraryName();
+            /* admin.SeatInfor("T003", 1);*/
+            #endregion
+
+            #endregion
+
         }
     }
 }

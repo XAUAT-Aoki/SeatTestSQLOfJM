@@ -9,7 +9,7 @@ namespace ConsoleApp1.ModelOfJM
         public DateTime? Ostime { get; set; }
         public DateTime? Octime { get; set; }
         public DateTime? Oetime { get; set; }
-        public byte[] Ostate { get; set; }
+        public string Ostate { get; set; }
         public string Sid { get; set; }
         public string Tid { get; set; }
 

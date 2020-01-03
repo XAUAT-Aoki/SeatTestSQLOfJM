@@ -10,7 +10,7 @@ namespace ConsoleApp1.ModelOfJM
             Seat = new HashSet<Seat>();
         }
 
-        public string Lid { get; set; }
+        public int Lid { get; set; }
         public string Llongitude { get; set; }
         public string Llatitute { get; set; }
         public string Lerror { get; set; }
