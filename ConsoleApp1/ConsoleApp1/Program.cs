@@ -180,14 +180,17 @@ namespace ConsoleApp1
         {
             //正则匹配（区分邮箱和学号）IsStudentId（）
             //根据对应的数据查询密码
-            var student = "";
+            string stu = null;
+            Student student = new Student();
             using (var context = new LSSDataContext())
             {
                 Help h = new Help();
-                if (h.IsStudentId(user)) student = context.Student.Single(b => b.Sid == user).Spassword;
-                else student = context.Student.Single(b => b.Semail == user).Spassword;
+                if (h.IsStudentId(user)) student = context.Student.Single(b => b.Sid == user);
+                else student = context.Student.Single(b => b.Semail == user);
+                if (student != null)
+                    stu = student.Spassword;
             }
-            return student;
+            return stu;
         }
         #endregion
         #region 2.修改密码 这里修改了返回类型 已完成
@@ -212,11 +215,14 @@ namespace ConsoleApp1
                     {//学号
                         if (h.IsStudentId(user)) student = dbContext.Student.Where(x => x.Sid == user).ToList().First();
                         else student = dbContext.Student.Where(x => x.Semail == user).ToList().First();
-                        student.Spassword = password;
-                        dbContext.Student.Update(student);
-                        dbContext.SaveChanges();
-                        transaction.Commit();
-                        flag = true;
+                        if (student != null)
+                        {
+                            student.Spassword = password;
+                            dbContext.Student.Update(student);
+                            dbContext.SaveChanges();
+                            transaction.Commit();
+                            flag = true;
+                        }
                     }
                     catch (Exception e)
                     {
@@ -243,54 +249,31 @@ namespace ConsoleApp1
             return student;
         }
         #endregion
-
-        #region 4.空闲座位查询 未完成
-        /// <summary>
-        /// 空闲座位查询
-        /// </summary>
-        /// <param name="condition"></param>
-        /// <returns></returns>
-        /* public List<Seat> Leisure(Condition condition)
-         {
-             Condition StartCondition = LeisureDeal(condition);
-             //判断是否是当天的日期
-             //如果开始时间和结束时间为null，则查询开始时间不小于6点，结束时间不大于23点
-             //如果输入condition.TimeBulk是0，则使用“111111111111111”
-             //对condition.data进行日期判断
-             return new List<Seat>();
-         }*/
-        #endregion
-        #region 5.不懂  未完成
-        /*  /// <summary>
-          /// 处理含有空字符的数据
-          /// </summary>
-          /// <param name="condition">返回处理结果用于可直接拼装sql的对象</param>
-          /// <returns>返回处理过的对象</returns>
-          public Condition LeisureDeal(Condition condition)
-          {
-              //使用try{]catch(){}语句处理转换异常
-              return new Condition();
-          }*/
-        #endregion
-
         #region 6.查询座位状态 已完成
         public string SeatState(int date, string seatid)
         {
             using (var context = new LSSDataContext())
             {
                 //查询状态字段，
-                string str = context.Seat.FirstOrDefault(x => x.Tid == seatid).Tstate;
-                char[] str2 = new char[24];
+                string str = null;
+                string str3 = null;
+                Seat seat = new Seat();
+                seat = context.Seat.FirstOrDefault(x => x.Tid == seatid);
+                if (seat != null)
+                {
+                    str = seat.Tstate;
+                    char[] str2 = new char[24];
+                    if (date == 0)
+                    {
+                        str2 = str.Substring(0, 24).ToCharArray();
+                    }
+                    else
+                    {
+                        str2 = str.Substring(24, 24).ToCharArray();
+                    }
+                    str3 = new string(str2);
+                }
                 //判断是否是当天的状态
-                if (date == 0)
-                {
-                    str2 = str.Substring(0, 24).ToCharArray();
-                }
-                else
-                {
-                    str2 = str.Substring(24, 24).ToCharArray();
-                }
-                string str3 = new string(str2);
                 return str3;
             }
         }
@@ -306,22 +289,29 @@ namespace ConsoleApp1
         {
             Student student = new Student();
             bool flag = false;
+            Help h = new Help();
             using (var context = new LSSDataContext())
             {
                 using (var transaction = context.Database.BeginTransaction())
                 {
                     try
                     {
-                        student = context.Student.FirstOrDefault(x => x.Sid == username);
-                        char[] old = { student.Slock.ElementAt(0), student.Slock.ElementAt(1) };
-                        if (date == 0) old[0] = operation;//修改第一天的状态
-                        else old[1] = operation;//修改第二天的状态
-                        string str = new string(old);
-                        student.Slock = str;
-                        context.Update(student);
-                        context.SaveChanges();
-                        transaction.Commit();
-                        flag = true;
+                        if (h.IsStudentId(username))
+                            student = context.Student.FirstOrDefault(x => x.Sid == username);
+                        else
+                            student = context.Student.FirstOrDefault(x => x.Semail == username);
+                        if (student != null)
+                        {
+                            char[] old = { student.Slock.ElementAt(0), student.Slock.ElementAt(1) };
+                            if (date == 0) old[0] = operation;//修改第一天的状态
+                            else old[1] = operation;//修改第二天的状态
+                            string str = new string(old);
+                            student.Slock = str;
+                            context.Update(student);
+                            context.SaveChanges();
+                            transaction.Commit();
+                            flag = true;
+                        }
                     }
                     catch (Exception)
                     {
@@ -345,11 +335,16 @@ namespace ConsoleApp1
             {
                 Student state = new Student();
                 Help h = new Help();
+                string ss = null;
                 if (h.IsStudentId(username))
                     state = dbContext.Student.Where(x => x.Sid == username).FirstOrDefault();
                 else
                     state = dbContext.Student.Where(x => x.Semail == username).FirstOrDefault();
-                return state.Slock;
+                if (state != null)
+                {
+                    ss = state.Slock;
+                }
+                return ss;
             }
             //调用正则匹配，进行查询lock字段
         }
@@ -367,27 +362,32 @@ namespace ConsoleApp1
         public bool SeatInfor(int date, string seatid, int num, int duration, char operation)
         {
             Seat seat = new Seat();
+            bool flag = false;
             using (var context = new LSSDataContext())
             {
                 seat = context.Seat.FirstOrDefault(x => x.Tid == seatid);
-                char[] c = new char[48];
-                c = seat.Tstate.ToCharArray();
-                if (date == 1)
+                if (seat != null)
                 {
-                    for (int i = 23 + num; i < 23 + num + duration; i++)
-                        c[i] = operation;
+                    char[] c = new char[48];
+                    c = seat.Tstate.ToCharArray();
+                    if (date == 1)
+                    {
+                        for (int i = 23 + num; i < 23 + num + duration; i++)
+                            c[i] = operation;
+                    }
+                    else
+                    {
+                        for (int i = num; i < num + duration; i++)
+                            c[i] = operation;
+                    }
+                    string s = new string(c);
+                    seat.Tstate = s;
+                    context.Seat.Update(seat);
+                    context.SaveChanges();
+                    flag = true;
                 }
-                else
-                {
-                    for (int i = num; i < num + duration; i++)
-                        c[i] = operation;
-                }
-                string s = new string(c);
-                seat.Tstate = s;
-                context.Seat.Update(seat);
-                context.SaveChanges();
             }
-            return true;
+            return flag;
             //将字符串修改之后直接插入座位表
         }
         #endregion
@@ -460,14 +460,18 @@ namespace ConsoleApp1
                     try
                     {
                         var order = context.Order.Where(x => x.Oid == oid).FirstOrDefault();
-                        order.Ostate = operation;
-                        context.Order.Update(order);
-                        context.SaveChanges();
-                        transaction.Commit();
-                        flag = true;
+                        if (order != null)
+                        {
+                            order.Ostate = operation;
+                            context.Order.Update(order);
+                            context.SaveChanges();
+                            transaction.Commit();
+                            flag = true;
+                        }
                     }
                     catch (Exception)
                     {
+                        transaction.Rollback();
                         return false;
                     }
                 }
@@ -484,13 +488,18 @@ namespace ConsoleApp1
         public int GetLIdBySId(string seatId)
         {
             Seat seat = new Seat();
+            int ss = 0;
             using (var context = new LSSDataContext())
             {
                 seat = (from s in context.Seat
                         where s.Tid == seatId
                         select s).ToList().FirstOrDefault();
+                if (seat != null)
+                {
+                    ss = seat.Lid;
+                }
             }
-            return seat.Lid;
+            return ss;
         }
         #endregion
         #region 16.根据图书馆 ID 返回一个图书馆对象   已完成
@@ -522,7 +531,9 @@ namespace ConsoleApp1
             //根据id查询一个订单记录，并返回Order对象
             using (var context = new LSSDataContext())
             {
-                return context.Order.FirstOrDefault(x => x.Oid == orderid);
+                Order order = new Order();
+                order = context.Order.FirstOrDefault(x => x.Oid == orderid);
+                return order;
             }
         }
         #endregion
@@ -549,21 +560,27 @@ namespace ConsoleApp1
                         if (!flag)
                         {
                             s = context.Student.FirstOrDefault(x => x.Sid == username);
-                            s.Semail = newemail;
-                            context.Student.Update(s);
-                            context.SaveChanges();
-                            transaction.Commit();
-                            flags = true;
+                            if (s != null)
+                            {
+                                s.Semail = newemail;
+                                context.Student.Update(s);
+                                context.SaveChanges();
+                                transaction.Commit();
+                                flags = true;
+                            }
                             //修改对应邮箱，返回true
                         }
                         else
                         {
                             s = context.Student.FirstOrDefault(x => x.Semail == username);
-                            s.Semail = newemail;
-                            context.Student.Update(s);
-                            context.SaveChanges();
-                            transaction.Commit();
-                            flags = true;
+                            if (s != null)
+                            {
+                                s.Semail = newemail;
+                                context.Student.Update(s);
+                                context.SaveChanges();
+                                transaction.Commit();
+                                flags = true;
+                            }
                             //修改邮箱，返回false
                         }
                     }
@@ -589,15 +606,27 @@ namespace ConsoleApp1
             List<Student> student = new List<Student>();
             using (var context = new LSSDataContext())
             {
-                student = (from s in context.Student
-                           select s
-                         ).ToList();
-                for (int i = 0; i < student.LongCount(); i++)
+                using (var transaction = context.Database.BeginTransaction())
                 {
-                    student[i].Svalue = a;
-                    context.Student.Update(student[i]);
+                    try
+                    {
+                        student = (from s in context.Student
+                                   select s
+                                     ).ToList();
+                        for (int i = 0; i < student.LongCount(); i++)
+                        {
+                            student[i].Svalue = a;
+                            context.Student.Update(student[i]);
+                        }
+                        context.SaveChanges();
+                        transaction.Commit();
+                    }
+                    catch (Exception)
+                    {
+                        transaction.Rollback();
+                        return false;
+                    }
                 }
-                context.SaveChanges();
             }
             return true;
         }
@@ -612,7 +641,11 @@ namespace ConsoleApp1
         {
             using (var context = new LSSDataContext())
             {
-                int level = (int)context.Student.FirstOrDefault(x => x.Sid == stuId).Svalue;
+                int level = 0;
+                Student student = new Student();
+                student = context.Student.FirstOrDefault(x => x.Sid == stuId);
+                if (student != null)
+                    level = (int)student.Svalue;
                 return level;
             }
         }
@@ -634,7 +667,7 @@ namespace ConsoleApp1
             List<Order> orders = new List<Order>();
             using (var dbContext = new LSSDataContext())
             {
-                if (data==0)
+                if (data == 0)
                 {
                     var order = (from o in dbContext.Order
                                  where o.Sid == stuId && day1 <= o.Ostime && o.Oetime <= day2
@@ -652,6 +685,95 @@ namespace ConsoleApp1
             }
         }
         #endregion
+        #region 21.修改下次打卡时间 已完成
+        /// <summary>
+        /// 修改下次打卡时间
+        /// </summary>
+        /// <param name="oid">订单id</param>
+        /// <param name="v">打卡时间的string类型</param>
+        public bool ChangeClockTime(string oid, string v)
+        {
+            bool flag = false;
+            using (var dbContext = new LSSDataContext())
+            {
+                Order order = new Order();
+                order = dbContext.Order.FirstOrDefault(x => x.Oid == oid);
+                if (order != null)
+                {
+                    DateTime ka2 = Convert.ToDateTime(v);
+                    order.Octime = ka2;
+                    dbContext.Update(order);
+                    flag = true;
+                }
+            }
+            return flag;
+        }
+        #endregion
+        #region 22.根据用户名查询该用户目前正在使用的订单 已完成
+        /// <summary>
+        /// 根据用户名查询该用户目前正在使用的订单，（判断依据：系统时间大于开始时间小于下次打卡时间（后延半小时的误差））
+        /// </summary>
+        /// <param name="studentid"></param>
+        /// <returns></returns>
+        public List<Order> GetUsingOrderBySid(string studentid)
+        {
+            using (var dbContext = new LSSDataContext())
+            {
+                List<Order> Olist = new List<Order>();
+                DateTime dtToday = Convert.ToDateTime(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                var queryable = (from list in dbContext.Order
+                                 where dtToday >= list.Ostime && dtToday <= list.Oetime && list.Sid == studentid
+                                 select list).GetEnumerator();
+                while (queryable.MoveNext()) Olist.Add(queryable.Current);
+                return Olist;
+            }
+        }
+        #endregion
+        #region 23.修改学生得信誉积分，每次修改减1 已完成
+        /// <summary>
+        /// 修改学生得信誉积分，每次修改减1
+        /// </summary>
+        /// <param name="sid">学生学号</param>
+        /// <returns></returns>
+        public bool DuctGlory(string sid)
+        {
+            bool flag = false;
+            using (var dbContext = new LSSDataContext())
+            {
+                Student student = new Student();
+                student = dbContext.Student.FirstOrDefault(x => x.Sid == sid);
+                if (student != null)
+                {
+                    student.Svalue = student.Svalue + 1;
+                    dbContext.Update(student);
+                    dbContext.SaveChanges();
+                    flag = true;
+                }
+            }
+            return flag;
+        }
+        #endregion
+        #region 24.根据学号查询该学生的email 已完成
+        /// <summary>
+        /// 根据学号查询该学生的email
+        /// </summary>
+        /// <param name="id">学号</param>
+        /// <returns>返回email</returns>
+        public string getEmailById(string id)
+        {
+            string str = null;
+            using (var dbContext = new LSSDataContext())
+            {
+                Student student = dbContext.Student.FirstOrDefault(x => x.Sid == id);
+                if (student != null)
+                {
+                    str = student.Semail;
+                }
+            }
+            return str;
+        }
+        #endregion
+
         #endregion
 
         static void Main(string[] args)
@@ -745,17 +867,25 @@ namespace ConsoleApp1
             #endregion
             #region 18.
             //program.ChangeEmail("168935.@qq.com", "923749851@qq.com");
+            /*    program.ResetGlory(9);*/
             #endregion
             #region 17.根据id查询订单
-            /*program.GetOrder("O10004");*/
+            /*            program.GetOrder("O1004");*/
             #endregion
             #region 19.根据学号获取学生的信誉积分
             /*  program.GetGlory("1606020002");*/
             #endregion
             #region 20. 根据学生学号以及传入的代表第二天的参数 data（1），获取第二天的订单
-            program.GetSecondOrder("1606020003");
-            program.GetSecondOrder("1606020003",0);
+            /*            program.GetSecondOrder("1606020003");
+                        program.GetSecondOrder("1606020003", 0);*/
             #endregion
+
+            #region 
+            /*program.DuctGlory("1606020002");*/
+
+            /* program.getEmailById("1606020098");*/
+            #endregion
+
             #endregion
 
             #region 2.管理员正式测试
@@ -784,9 +914,29 @@ namespace ConsoleApp1
             //admin.GetAllLibraryName();
             /* admin.SeatInfor("T003", 1);*/
             #endregion
+            /*  Console.WriteLine(admin.QueryAllEmptySeat("南山", 2, 1, 2, 0).Count());
+              Console.WriteLine(admin.QueryAllEmptySeat("南山", 2, 1, 3, 0).Count());
+              Console.WriteLine(admin.QueryAllEmptySeat("南山", 2, 1, 4, 0).Count());
+              Console.WriteLine(admin.QueryAllEmptySeat("南山", 2, 1, 5, 0).Count());
 
+              Console.WriteLine(admin.QueryAllEmptySeat("南山", 2, 8, 12, 1).Count());
+              Console.WriteLine(admin.QueryAllEmptySeat("南山", 2, 8, 11, 1).Count());
+              Console.WriteLine(admin.QueryAllEmptySeat("南山", 2, 8, 10, 1).Count());
+              Console.WriteLine(admin.QueryAllEmptySeat("南山", 2, 8, 9, 1).Count());
+           *//*   Console.WriteLine(admin.QueryAllEmptySeat("南山", 2, 8, 13, 1).Count());*//*
+            Console.WriteLine(admin.QueryAllBookNotSeat("南山", 2, 1, 2, 0).Count());
+            Console.WriteLine(admin.QueryAllBookNotSeat("南山", 2, 1, 3, 0).Count());
+            Console.WriteLine(admin.QueryAllBookNotSeat("南山", 2, 1, 4, 0).Count());
+            Console.WriteLine(admin.QueryAllBookNotSeat("南山", 2, 1, 5, 0).Count());
+
+            Console.WriteLine(admin.QueryAllBookNotSeat("南山", 2, 8, 12, 1).Count());
+            Console.WriteLine(admin.QueryAllBookNotSeat("南山", 2, 8, 11, 1).Count());
+            Console.WriteLine(admin.QueryAllBookNotSeat("南山", 2, 8, 10, 1).Count());
+            Console.WriteLine(admin.QueryAllBookNotSeat("南山", 2, 8, 9, 1).Count());
+            Console.WriteLine(admin.QueryAllBookNotSeat("南山", 2, 8, 13, 1).Count());*/
             #endregion
-
+            //admin.QueryAllLibrarySeats("南山", 2);
+            admin.StatisticalCount();
         }
     }
 }
